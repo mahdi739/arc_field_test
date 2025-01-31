@@ -2,16 +2,16 @@ use leptos::prelude::*;
 use reactive_stores::{ArcField, ArcStore, Store};
 #[derive(Store, Default)]
 pub struct State {
-  #[store(key:String = |session| session.clone())]
-  sessions: Vec<String>,
+  #[store(key:usize= |session| session.0)]
+  sessions: Vec<(usize, String)>,
 }
 
 #[component]
 pub fn App() -> impl IntoView {
-  let selected_session: ArcStore<Option<String>> = ArcStore::new(None);
+  let selected_session: ArcStore<Option<(usize, String)>> = ArcStore::new(None);
 
   let state = ArcStore::new(State {
-    sessions: vec!["Item1".to_string(), "Item2".to_string(), "Item3".to_string()],
+    sessions: vec![(0, "Item1".to_string()), (1, "Item2".to_string()), (2, "Item3".to_string())],
   });
   let selected_session_cloned = selected_session.clone();
   let selected_session_cloned2 = selected_session.clone();
@@ -26,7 +26,7 @@ pub fn App() -> impl IntoView {
             selected_session_cloned
               .get()
               .map(|selected_session| {
-                let removing_index = state.sessions.iter().position(|session| *session == selected_session).unwrap();
+                let removing_index = state.sessions.iter().position(|session| session.0 == selected_session.0).unwrap();
                 state.sessions.remove(removing_index);
               });
           });
@@ -38,7 +38,7 @@ pub fn App() -> impl IntoView {
         let state_cloned = state.clone();
         move || state_cloned.clone().sessions()
       }
-      key=|item| item.get()
+      key=|item| item.get().0
       let(session)
     >
       <p on:click={
@@ -49,14 +49,14 @@ pub fn App() -> impl IntoView {
       }>
         {
           let session_cloned = session.clone();
-          move || session_cloned.get()
+          move || format!("{:?}", session_cloned.get())
         }
       </p>
     </For>
     <button on:click={move |_| {
       selected_session_cloned
         .update(|selected_session| {
-          selected_session.as_mut().map(|f| f.push_str(" Hey!"));
+          selected_session.as_mut().map(|f| f.1.push_str(" Hey!"));
         });
     }}>"Add Hey!"</button>
     <strong>"Selected Item: " {move || { format!("{:?}", selected_session_cloned2.get()) }}</strong>
