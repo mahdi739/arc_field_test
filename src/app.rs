@@ -4,36 +4,33 @@ use reactive_stores::{ArcField, ArcStore, Store};
 pub struct State {
   #[store(key:String = |session| session.clone())]
   sessions: Vec<String>,
-  #[store(skip)]
-  selected_session: Option<ArcField<String>>,
 }
 
 #[component]
 pub fn App() -> impl IntoView {
+  let selected_session: ArcStore<Option<String>> = ArcStore::new(None);
+
   let state = ArcStore::new(State {
     sessions: vec!["Item1".to_string(), "Item2".to_string(), "Item3".to_string()],
-    selected_session: None,
   });
-  let state_cloned = state.clone();
+  let selected_session_cloned = selected_session.clone();
+  let selected_session_cloned2 = selected_session.clone();
   view! {
     <button on:click={
       let state_cloned = state.clone();
+      let selected_session_cloned = selected_session.clone();
+      let selected_session_cloned2 = selected_session.clone();
       move |_| {
         state_cloned
           .update(|state| {
-            state
-              .selected_session
-              .clone()
+            selected_session_cloned
+              .get()
               .map(|selected_session| {
-                let removing_index = state
-                  .sessions
-                  .iter()
-                  .position(|session| *session == selected_session.get())
-                  .unwrap();
+                let removing_index = state.sessions.iter().position(|session| *session == selected_session).unwrap();
                 state.sessions.remove(removing_index);
-                state.selected_session = None;
               });
-          })
+          });
+        selected_session_cloned2.set(None);
       }
     }>"Delete selected item"</button>
     <For
@@ -45,9 +42,9 @@ pub fn App() -> impl IntoView {
       let(session)
     >
       <p on:click={
-        let state_cloned = state.clone();
+        let selected_session_cloned = selected_session.clone();
         move |_| {
-          state_cloned.update(|state| state.selected_session = Some(session.clone().into()));
+          selected_session_cloned.set(Some(session.clone().get()));
         }
       }>
         {
@@ -56,18 +53,12 @@ pub fn App() -> impl IntoView {
         }
       </p>
     </For>
-
-    <strong>
-      "Selected Item: "
-      {move || {
-        format!(
-          "{:?}",
-          state_cloned
-            .with(|state| {
-              state.selected_session.clone().map(|selected_Session| selected_Session.get())
-            }),
-        )
-      }}
-    </strong>
+    <button on:click={move |_| {
+      selected_session_cloned
+        .update(|selected_session| {
+          selected_session.as_mut().map(|f| f.push_str(" Hey!"));
+        });
+    }}>"Add Hey!"</button>
+    <strong>"Selected Item: " {move || { format!("{:?}", selected_session_cloned2.get()) }}</strong>
   }
 }
