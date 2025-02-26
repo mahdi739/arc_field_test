@@ -7,10 +7,11 @@ edition = "2021"
 leptos = { git = "https://github.com/leptos-rs/leptos", features = ["csr"] }
 reactive_stores = { git = "https://github.com/leptos-rs/leptos", package = "reactive_stores" }
 reactive_stores_macro = { git = "https://github.com/leptos-rs/leptos", package = "reactive_stores_macro" }
+
 console_log = "1"
 log = "0.4.22"
 console_error_panic_hook = "0.1.7"
-
+uuid = { version = "1.13.1", features = ["js", "serde", "v4"] }
 
 [profile.release]
 codegen-units = 1
