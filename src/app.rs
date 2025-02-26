@@ -11,7 +11,7 @@ pub struct Session(usize, String);
 #[component]
 pub fn App() -> impl IntoView {
   let selected_session: RwSignal<Option<Field<Session>>> = RwSignal::new(None);
-  
+
   let state = Store::new(State {
     sessions: vec![
       Session(0, "Item1".to_string()),
